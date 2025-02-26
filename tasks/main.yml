@@ -1,0 +1,64 @@
+---
+- name: Stop Jenkins service
+  ansible.builtin.service:
+    name: jenkins
+    state: stopped
+    enabled: false
+  ignore_errors: true
+
+- name: Remove Jenkins service definition file
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /lib/systemd/system/jenkins.service
+    - /etc/systemd/system/jenkins.service
+  ignore_errors: true
+
+- name: Remove Java packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - java-11-openjdk
+    - java-17-openjdk
+    - java-21-openjdk
+  ignore_errors: true
+
+- name: Remove Jenkins packages
+  ansible.builtin.package:
+    name: jenkins
+    state: absent
+  ignore_errors: true
+
+- name: Remove Jenkins directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /var/lib/jenkins
+    - /etc/jenkins
+    - /var/cache/jenkins
+    - /var/log/jenkins
+    - /run/jenkins
+    - /usr/share/jenkins
+
+- name: Remove Jenkins user and group
+  ansible.builtin.user:
+    name: jenkins
+    state: absent
+    remove: yes
+  ignore_errors: true
+
+- name: Remove Jenkins repository
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/apt/sources.list.d/jenkins.list
+    - /etc/yum.repos.d/jenkins.repo
+  ignore_errors: true
+
+- name: Clean YUM cache (RedHat/CentOS)
+  ansible.builtin.command: yum clean all
+  ignore_errors: true
