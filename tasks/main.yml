@@ -59,6 +59,11 @@
     - /etc/yum.repos.d/jenkins.repo
   ignore_errors: true
 
+- name: Remove Firewalld Service
+  ansible.builtin.package:
+    name: firewalld
+    state: absent
+
 - name: Clean YUM cache (RedHat/CentOS)
   ansible.builtin.command: yum clean all
   ignore_errors: true
